@@ -333,7 +333,7 @@ Mask Aadhaar and PAN numbers. Return JSON only."""
 COLORS = {"RED": "🔴", "AMBER": "🟠", "INFO": "⚪"}
 
 
-(import os
+import os
 import json
 import re
 import streamlit as st
