@@ -334,8 +334,12 @@ COLORS = {"RED": "🔴", "AMBER": "🟠", "INFO": "⚪"}
 
 
 def extract(data, mime):
-    # Safe client initialization for google-genai SDK
-    client = genai.Client() # Yeh environment variable (GEMINI_API_KEY) ya default config se automatically key utha lega
+    # API key ko securely fetch karein
+    api_key = st.secrets["GEMINI_API_KEY"] if "GEMINI_API_KEY" in st.secrets else os.environ.get("GEMINI_API_KEY")
+    
+    # Client initialize karte waqt explicit configuration pass karein
+    client = genai.Client(api_key=api_key)
+    
     resp = client.models.generate_content(
         model=MODEL,
         contents=[types.Part.from_bytes(data=data, mime_type=mime), PROMPT],
