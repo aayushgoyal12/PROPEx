@@ -340,19 +340,20 @@ import json
 import re
 import streamlit as st
 import google.generativeai as genai
+from google.oauth2.credentials import Credentials
 
 def extract(data, mime):
-    api_key = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY"))
+    token = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY"))
     
-    # Configure genai with client options for token auth
-    genai.configure(api_key=api_key)
+    # AQ token ke liye OAuth Credentials object banayein
+    creds = Credentials(token=token)
+    genai.configure(credentials=creds)
     
     model = genai.GenerativeModel(
         model_name="gemini-1.5-flash",
         system_instruction=SYSTEM
     )
     
-    # Send document parts
     doc_part = {"mime_type": mime, "data": data}
     response = model.generate_content([doc_part, PROMPT])
     
