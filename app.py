@@ -342,12 +342,11 @@ from google.genai import types
 from google.oauth2.credentials import Credentials
 
 def extract(data, mime):
-    # Fetch token from Streamlit secrets
+    # Streamlit secrets se token fetch karein
     api_key = st.secrets["GEMINI_API_KEY"] if "GEMINI_API_KEY" in st.secrets else os.environ.get("GEMINI_API_KEY")
     
-    # Check if key is an AQ... token or standard AIza... key
+    # AQ tokens ke liye OAuth Bearer credentials object pass karna zaroori hai
     if api_key and api_key.startswith("AQ"):
-        # Format as OAuth2 Credentials object for AQ tokens
         creds = Credentials(token=api_key)
         client = genai.Client(credentials=creds)
     else:
