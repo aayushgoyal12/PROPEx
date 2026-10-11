@@ -332,9 +332,6 @@ PROMPT = """Extract this document into JSON with exactly these keys:
 Mask Aadhaar and PAN numbers. Return JSON only."""
 COLORS = {"RED": "🔴", "AMBER": "🟠", "INFO": "⚪"}
 
-
-
-
 import os
 import json
 import re
@@ -345,7 +342,11 @@ from google.oauth2.credentials import Credentials
 def extract(data, mime):
     token = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY"))
     
-    # AQ token ke liye OAuth Credentials object banayein
+    # Conflicting environment variables ko clear karein taaki mutual exclusivity error na aaye
+    os.environ.pop("GEMINI_API_KEY", None)
+    os.environ.pop("GOOGLE_API_KEY", None)
+    
+    # OAuth Credentials configure karein
     creds = Credentials(token=token)
     genai.configure(credentials=creds)
     
