@@ -333,31 +333,30 @@ Mask Aadhaar and PAN numbers. Return JSON only."""
 COLORS = {"RED": "🔴", "AMBER": "🟠", "INFO": "⚪"}
 
 
+
+
 import os
 import json
 import re
 import streamlit as st
-from google import genai
-from google.genai import types
-from google.oauth2.credentials import Credentials
+import google.generativeai as genai
 
 def extract(data, mime):
-    # Streamlit secrets se token fetch karein
-    api_key = st.secrets["GEMINI_API_KEY"] if "GEMINI_API_KEY" in st.secrets else os.environ.get("GEMINI_API_KEY")
+    api_key = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY"))
     
-    # AQ tokens ke liye OAuth Bearer credentials object pass karna zaroori hai
-    if api_key and api_key.startswith("AQ"):
-        creds = Credentials(token=api_key)
-        client = genai.Client(credentials=creds)
-    else:
-        client = genai.Client(api_key=api_key)
-
-    resp = client.models.generate_content(
-        model=MODEL,
-        contents=[types.Part.from_bytes(data=data, mime_type=mime), PROMPT],
-        config=types.GenerateContentConfig(system_instruction=SYSTEM, response_mime_type="application/json"),
+    # Configure genai with client options for token auth
+    genai.configure(api_key=api_key)
+    
+    model = genai.GenerativeModel(
+        model_name="gemini-1.5-flash",
+        system_instruction=SYSTEM
     )
-    out = json.loads(re.search(r"\{.*\}", resp.text, re.S).group(0))
+    
+    # Send document parts
+    doc_part = {"mime_type": mime, "data": data}
+    response = model.generate_content([doc_part, PROMPT])
+    
+    out = json.loads(re.search(r"\{.*\}", response.text, re.S).group(0))
     if out.get("doc_type") not in DOC_LABELS:
         out["doc_type"] = "OTHER"
     return out
