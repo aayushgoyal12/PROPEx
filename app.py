@@ -333,13 +333,26 @@ Mask Aadhaar and PAN numbers. Return JSON only."""
 COLORS = {"RED": "🔴", "AMBER": "🟠", "INFO": "⚪"}
 
 
+(import os
+import json
+import re
+import streamlit as st
+from google import genai
+from google.genai import types
+from google.oauth2.credentials import Credentials
+
 def extract(data, mime):
-    # API key ko securely fetch karein
+    # Fetch token from Streamlit secrets
     api_key = st.secrets["GEMINI_API_KEY"] if "GEMINI_API_KEY" in st.secrets else os.environ.get("GEMINI_API_KEY")
     
-    # Client initialize karte waqt explicit configuration pass karein
-    client = genai.Client(api_key=api_key)
-    
+    # Check if key is an AQ... token or standard AIza... key
+    if api_key and api_key.startswith("AQ"):
+        # Format as OAuth2 Credentials object for AQ tokens
+        creds = Credentials(token=api_key)
+        client = genai.Client(credentials=creds)
+    else:
+        client = genai.Client(api_key=api_key)
+
     resp = client.models.generate_content(
         model=MODEL,
         contents=[types.Part.from_bytes(data=data, mime_type=mime), PROMPT],
